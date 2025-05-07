@@ -51,7 +51,7 @@ export const BookmarkPopover = ({ folders, onSave }: BookmarkPopoverProps) => {
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom">
       <PopoverTrigger>
-        <Button>Add to Bookmarks</Button>
+        <Button>Add to Folder</Button>
       </PopoverTrigger>
 
       <PopoverContent>

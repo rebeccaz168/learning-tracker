@@ -1,67 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, sql } from '@vercel/postgres';
 import { faker } from '@faker-js/faker';
-import { Transcript } from '@/utils/types';
+import { Topic } from '@/utils/types';
 
 const seedDb = async ({ reset = false }: { reset?: boolean }) => {
   console.log('Creating tables');
 
   if (reset) {
     console.log('Resetting database');
-    await sql`DROP TABLE IF EXISTS transcript_question_answer`;
-    await sql`DROP TABLE IF EXISTS transcript`;
-
+    await sql`DROP TABLE IF EXISTS bookmark`;
+    await sql`DROP TABLE IF EXISTS note`;
+    await sql`DROP TABLE IF EXISTS topic`;
+    await sql`DROP TABLE IF EXISTS folder`;
+  
     // Create tables
     await sql`
-      CREATE TABLE transcript (
+      CREATE TABLE topic (
         id SERIAL PRIMARY KEY,
-        interview_name TEXT
-      );`;
-
+        topic_name TEXT
+      );
+    `;
+  
     await sql`
-      CREATE TABLE transcript_question_answer (
+      CREATE TABLE note (
         id SERIAL PRIMARY KEY,
-        transcript_id INTEGER,
-        question TEXT,
-        answer TEXT,
-        FOREIGN KEY(transcript_id) REFERENCES transcript(id) ON DELETE CASCADE
-      );`;
+        topic_id INTEGER,
+        title TEXT,
+        reflection TEXT,
+        date TEXT,
+        FOREIGN KEY(topic_id) REFERENCES topic(id) ON DELETE CASCADE
+      );
+    `;
+  
+    await sql`
+      CREATE TABLE folder (
+        id SERIAL PRIMARY KEY,
+        name TEXT
+      );
+    `;
+  
+    await sql`
+      CREATE TABLE bookmark (
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        topicId INTEGER,
+        noteId INTEGER,
+        folderId INTEGER,
+        FOREIGN KEY(topicId) REFERENCES topic(id) ON DELETE CASCADE,
+        FOREIGN KEY(noteId) REFERENCES note(id) ON DELETE CASCADE,
+        FOREIGN KEY(folderId) REFERENCES folder(id) ON DELETE CASCADE
+      );
+    `;
   }
+  
 
   console.log('Seeding data');
 
-  // Seed 5 transcripts
-  const transcripts = Array.from({ length: 5 }, () => faker.person.fullName());
+  // Seed 5 topics
+  const topics = Array.from({ length: 5 }, () => faker.company.catchPhrase());
 
-  console.log('transcripts', transcripts);
+  console.log('topics', topics);
 
-  const createdTs = await Promise.all(
-    transcripts.map(
-      (t) =>
-        sql<Transcript>`INSERT INTO transcript (interview_name) VALUES (${t}) RETURNING id;`
+  const createdTopics = await Promise.all(
+    topics.map(
+      (name) =>
+        sql<Topic>`INSERT INTO topic (topic_name) VALUES (${name}) RETURNING id;`
     )
   );
 
-  const transcriptRows = createdTs.flatMap((t) => t.rows);
+  const topicRows = createdTopics.flatMap((t) => t.rows);
 
-  const qaRows = transcriptRows.flatMap((transcript) => {
-    const transcriptId = transcript.id;
+  const noteRows = topicRows.flatMap((topic) => {
+    const sessionId = topic.id;
 
-    return Array.from({ length: 20 }, () => {
-      const question = faker.lorem.sentence() + '?';
-      const answer = faker.lorem.paragraph();
-      return [transcriptId, question, answer];
+    return Array.from({ length: 5 }, () => {
+      const title = faker.hacker.verb() + ' ' + faker.hacker.noun();
+      const reflection = faker.lorem.paragraphs(2);
+      const date = faker.date.recent().toISOString().split('T')[0];
+      return [sessionId, title, reflection, date];
     });
   });
 
   await Promise.all(
-    qaRows.map(
-      (qa) =>
-        sql`INSERT INTO transcript_question_answer (transcript_id, question, answer) VALUES (${qa[0]}, ${qa[1]}, ${qa[2]})`
+    noteRows.map(
+      (note) =>
+        sql`INSERT INTO note (topic_id, title, reflection, date) VALUES (${note[0]}, ${note[1]}, ${note[2]}, ${note[3]})`
     )
   );
 
-  console.log('created question-answer rows:', qaRows);
+  console.log('created note rows:', noteRows);
 };
 
 export async function GET(req: NextRequest) {

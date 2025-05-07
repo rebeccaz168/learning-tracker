@@ -3,7 +3,7 @@ import { sql } from '@vercel/postgres';
 
 export async function GET() {
   const result = await sql`
-    SELECT * FROM folders;
+    SELECT * FROM folder;
   `;
   const folders = result.rows;
   return NextResponse.json({ success: true, folders }, { status: 200 });
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const { name } = await req.json();
   
   const result = await sql`
-    INSERT INTO folders (name)
+    INSERT INTO folder (name)
     VALUES (${name})
     RETURNING *;
   `;

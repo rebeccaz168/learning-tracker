@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Button, Flex, HStack, Heading, Input, Link, Popover, PopoverContent, PopoverTrigger, Portal, Text, VStack} from '@chakra-ui/react';
-import { fetchTranscript, fetchFolder, createFolder, createBookmark } from '@/utils/api';
-import { Folder, TranscriptWithQA } from '@/utils/types';
+import { fetchNote, fetchFolder, createFolder, createBookmark } from '@/utils/api';
+import { Folder, TopicWithNote } from '@/utils/types';
 import { BookmarkPopover } from './bookmarkPopover';
 
 const Home = () => {
-  const [transcripts, setTranscripts] = useState<TranscriptWithQA[] | null>(
+  const [notes, setNotes] = useState<TopicWithNote[] | null>(
     null
   );
   const [folders, setFolders] = useState<Folder[] | null> (
@@ -18,9 +18,9 @@ const Home = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetchTranscript()
+    fetchNote()
       .then((data) => {
-        setTranscripts(data.transcripts);
+        setNotes(data.topics);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -74,21 +74,21 @@ const Home = () => {
         <Flex direction="column" justify="space-between" height="full">
         {/* Top section: Transcripts */}
         <VStack align="stretch" width="full" spacing={2}>
-          {transcripts?.map(({ transcript }) => (
+          {notes?.map(({ topic }) => (
             <Link
               p={2}
-              key={transcript.id}
-              href={`#${transcript.id}`}
+              key={topic.id}
+              href={`#${topic.id}`}
               borderRadius="md"
               _hover={{ bg: 'teal.100' }}
             >
-              <Text fontSize="sm" >{transcript.interview_name}</Text>
+              <Text fontSize="sm" >{topic.topic_name}</Text>
             </Link>
           ))}
         </VStack>
         {/* Bottom section: Bookmarks */}
         <VStack align="stretch" width="full" spacing={2}>
-          <Link href = "/bookmarks"> Bookmarks </Link>
+          <Link href = "/bookmarks"> Folders </Link>
           {folders?.map((folder) => (
               <Text key={folder.id} fontSize="sm" color="gray.700">{folder.name || 'untitled'}</Text>
           ))}
@@ -122,30 +122,30 @@ const Home = () => {
         w="full"
       >
         {loading && <Box>Loading...</Box>}
-        {transcripts?.map(({ transcript, quotes }) => (
+        {notes?.map(({ topic, notes }) => (
           <Box
-            id={transcript.id}
-            key={transcript.id}
+            id={topic.id}
+            key={topic.id}
             p={6}
             bg="white"
             borderRadius="md"
             boxShadow="md"
           >
             <Heading size="md" mb={4} color="teal.600">
-              Interview
+              Study Topics
             </Heading>
             <Text fontSize="lg" mb={6} color="gray.700">
-              {transcript.interview_name}
+              {topic.topic_name}
             </Text>
 
             <Heading size="md" mb={4} color="teal.600">
-              Quotes
+              Notes
             </Heading>
 
             <VStack align="stretch" spacing={6}>
-              {quotes?.map((quote) => (
+              {notes?.map((note) => (
                 <VStack
-                  key={quote.id}
+                  key={note.id}
                   align="stretch"
                   borderWidth={1}
                   borderRadius="md"
@@ -155,15 +155,15 @@ const Home = () => {
                   boxShadow="sm"
                 >
                   <Text fontWeight="bold" fontSize="lg" color="teal.700">
-                    {quote.question}
+                    {note.title}
                   </Text>
                   <Text fontSize="md" color="gray.800">
-                    {quote.answer}
+                    {note.reflection}
                   </Text>
                   <BookmarkPopover
                     folders={folders || []}
                     onSave={(folderId, title) => {
-                      handleCreateBookmark(folderId, quote.id, transcript.id, title)
+                      handleCreateBookmark(folderId, note.id, topic.id, title)
                     }}
                   />
                 </VStack>

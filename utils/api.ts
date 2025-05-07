@@ -4,8 +4,8 @@ const api = axios.create({
   baseURL: '/api',
 });
 
-export const fetchTranscript = async () => {
-  const response = await api.get(`/transcript`);
+export const fetchNote = async () => {
+  const response = await api.get(`/note`);
   return response.data;
 };
 

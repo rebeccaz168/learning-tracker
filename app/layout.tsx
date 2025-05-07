@@ -5,8 +5,8 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Junior | Take Home',
-  description: 'Take Home Test for Junior Developers',
+  title: 'Mind Marker',
+  description: 'Track quotes, and articles youre learning from and summarize your takeaways',
 };
 
 export default function RootLayout({
