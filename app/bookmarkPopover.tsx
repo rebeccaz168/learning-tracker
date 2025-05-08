@@ -29,24 +29,27 @@ export const BookmarkPopover = ({ folders, onSave }: BookmarkPopoverProps) => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const { onClose, onOpen, isOpen } = useDisclosure();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setTitleTouched(true);
-
+  
     if (!bookmarkTitle.trim()) return;
-
+  
     setIsSaving(true);
-    onSave(selectedFolderId, bookmarkTitle);
+    await onSave(selectedFolderId, bookmarkTitle); 
+  
     setBookmarkTitle('');
     setSelectedFolderId('');
     setSaveSuccess(true);
-
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setIsSaving(false);
-      setTitleTouched(false);
-      onClose();
-    }, 1000);
+  
+    // Wait for 1 second before resetting state and closing the modal
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  
+    setSaveSuccess(false); 
+    setIsSaving(false);    
+    setTitleTouched(false); 
+    onClose();              
   };
+  
 
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom">

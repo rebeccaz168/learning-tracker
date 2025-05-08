@@ -19,6 +19,15 @@ export const createFolder = async (name: string) => {
   return response.data;
 };
 
+export const createNote = async (title: string, reflection: string, topic_name: string) => {
+  const response = await api.post('/note', {
+    title,
+    reflection,
+    topic_name,
+  });
+  return response.data;
+};
+
 export const createBookmark = async(title : string, transcriptQId: string, transcriptId : string, folderId: string) => {
   const response = await api.post(`/transcript/${transcriptId}/bookmarks`, {
     title,
@@ -29,7 +38,6 @@ export const createBookmark = async(title : string, transcriptQId: string, trans
   return response.data; 
 }
 
-// eventually perhaps filter based on transcriptId 
 export const fetchBookmark = async (transcriptId?: string) => {
   const response = await api.get(`/transcript/${transcriptId}/bookmarks`);
   return response.data;
