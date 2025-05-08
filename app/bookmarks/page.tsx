@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchBookmark, fetchSummary, fetchTranscript } from '@/utils/api';
-import { BookMarkWithInfo, Transcript, TranscriptWithQA } from '@/utils/types';
+import { fetchBookmark, fetchSummary, fetchNote } from '@/utils/api';
+import { BookMarkWithInfo, Note, Topic, TopicWithNote } from '@/utils/types';
 
 
 import { Box, Heading, Text, Stack, Divider, Container, Button, WrapItem, Wrap, Spinner } from '@chakra-ui/react';
@@ -10,16 +10,17 @@ import { Box, Heading, Text, Stack, Divider, Container, Button, WrapItem, Wrap, 
 const BookmarksPage = () => {
   const [bookmarks, setBookmarks] = useState<BookMarkWithInfo[]>([]);
   const [filteredBookmarks, setFilteredBookmarks] = useState<BookMarkWithInfo[]>([]);
-  const [transcriptId, setTranscriptId] = useState('all');
-  const [transcripts, setTranscripts] = useState<TranscriptWithQA[]>([]);
+  const [topicId, setTopicId] = useState('all');
+  const [transcripts, setTranscripts] = useState<TopicWithNote[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
+  console.log(bookmarks);
   // get all the transcripts 
   useEffect(() => {
     const getTranscripts = async () => {
       try {
-        const data = await fetchTranscript();
+        const data = await fetchNote();
         setTranscripts(data.transcripts || []);
       } catch (error) {
         console.error('Error fetching transcripts:', error);
@@ -35,8 +36,8 @@ const BookmarksPage = () => {
     const loadAllBookmarks = async () => {
         if (transcripts.length === 0) return;
         const allBookmarks = await Promise.all(
-        transcripts.map(async (t: TranscriptWithQA) => {
-            const data = await fetchBookmark(t.transcript.id);
+        transcripts.map(async (t: TopicWithNote) => {
+            const data = await fetchBookmark(t.topic.id);
             return data.bookmarks || [];
             })
         );
@@ -49,16 +50,16 @@ const BookmarksPage = () => {
     loadAllBookmarks();
     }, [transcripts]);
 
-    // Filter bookmarks by selected transcriptId
+    // Filter bookmarks by selected topicId
     useEffect(() => {
         // create default case 
-        if (transcriptId === 'all') {
+        if (topicId === 'all') {
           setFilteredBookmarks(bookmarks);
         } else {
-          const filtered = bookmarks.filter(b => b.transcript.id === transcriptId);
+          const filtered = bookmarks.filter(b => b.topic.id === topicId);
           setFilteredBookmarks(filtered);
         }
-      }, [bookmarks, transcriptId]);
+      }, [bookmarks, topicId]);
       
 
   // download all the bookmarks (not filtered)
@@ -70,13 +71,14 @@ const BookmarksPage = () => {
       'Question',
       'Answer'
     ];
-  
-    const rows = bookmarks.map(({ bookmark, folder, transcript, transcriptQA }) => [
+    
+    // need to check this type 
+    const rows = bookmarks.map(({ bookmark, folder, topic, note }) => [
       `"${bookmark.title}"`,
-      `"${transcript.interview_name}"`,
+      `"${topic.topic_name}"`,
       `"${folder.name}"`,
-      `"${transcriptQA.question}"`,
-      `"${transcriptQA.answer}"`
+      `"${note.title}"`,
+      `"${note.reflection}"`
     ]);
   
     const csvContent =
@@ -94,9 +96,9 @@ const BookmarksPage = () => {
   const handleSummarize = async () => {
     setIsSummarizing(true);
     setSummary(null);
-    const combinedAnswers : string = filteredBookmarks.map(b => b.transcriptQA.answer).join(' ');
+    const combinedAnswers : string = filteredBookmarks.map(b => b.note.reflection).join(' ');
     try {
-      const response = await fetchSummary(combinedAnswers, transcriptId)
+      const response = await fetchSummary(combinedAnswers, topicId)
       setSummary(response.summary || 'No summary returned');
     } catch (error) {
       console.error('Error summarizing:', error);
@@ -118,20 +120,20 @@ const BookmarksPage = () => {
       <Wrap spacing={2} mb={6}>
         <WrapItem>
             <Button
-            variant={transcriptId === 'all' ? 'solid' : 'outline'}
-            onClick={() => setTranscriptId('all')}
+            variant={topicId === 'all' ? 'solid' : 'outline'}
+            onClick={() => setTopicId('all')}
             >
             All
             </Button>
         </WrapItem>
 
         {transcripts.map(t => (
-            <WrapItem key={t.transcript.id}>
+            <WrapItem key={t.topic.id}>
             <Button
-                variant={transcriptId === t.transcript.id ? 'solid' : 'outline'}
-                onClick={() => setTranscriptId(t.transcript.id)}
+                variant={topicId === t.topic.id ? 'solid' : 'outline'}
+                onClick={() => setTopicId(t.topic.id)}
             >
-                {t.transcript.interview_name}
+                {t.topic.topic_name}
             </Button>
             </WrapItem>
         ))}
@@ -154,14 +156,14 @@ const BookmarksPage = () => {
         </Box>
       )}
       <Stack spacing={6}>
-        {filteredBookmarks?.map(({ bookmark, folder,  transcript, transcriptQA}) => (
+        {filteredBookmarks?.map(({ bookmark, folder,  topic, note}) => (
           <Box key={bookmark.id} borderWidth="1px" borderRadius="lg" p={4} boxShadow="sm">
             <Heading as="h3" size="md" mb={2}>
               {bookmark.title}
             </Heading>
 
             <Text fontSize="sm" color="gray.600">
-              <strong>Interview:</strong> {transcript.interview_name}
+              <strong>Topic:</strong> {topic.topic_name}
             </Text>
             <Text fontSize="sm" color="gray.600">
               <strong>Folder:</strong> {folder.name}
@@ -170,10 +172,10 @@ const BookmarksPage = () => {
             <Divider my={2} />
 
             <Text>
-              <strong>Question:</strong> {transcriptQA.question}
+              <strong>Title:</strong> {note.title}
             </Text>
             <Text>
-              <strong>Answer:</strong> {transcriptQA.answer}
+              <strong>Reflection:</strong> {note.reflection}
             </Text>
           </Box>
         ))}

@@ -5,6 +5,7 @@ import { Box, Button, Flex, HStack, Heading, Input, Link, Popover, PopoverConten
 import { fetchNote, fetchFolder, createFolder, createBookmark } from '@/utils/api';
 import { Folder, TopicWithNote } from '@/utils/types';
 import { BookmarkPopover } from './bookmarkPopover';
+import { AddNoteModal } from './addNoteModal';
 
 const Home = () => {
   const [notes, setNotes] = useState<TopicWithNote[] | null>(
@@ -58,6 +59,7 @@ const Home = () => {
       console.error('Error creating new bookmark')
     }
   }
+
 
   return (
     <HStack align="flex-start" height="full" width="full" spacing={0}>
@@ -121,6 +123,10 @@ const Home = () => {
         boxShadow="lg"
         w="full"
       >
+        <Heading size="md" mb={4} color="teal.600">
+          Study Topics
+        </Heading>
+        <AddNoteModal/>
         {loading && <Box>Loading...</Box>}
         {notes?.map(({ topic, notes }) => (
           <Box
@@ -131,9 +137,6 @@ const Home = () => {
             borderRadius="md"
             boxShadow="md"
           >
-            <Heading size="md" mb={4} color="teal.600">
-              Study Topics
-            </Heading>
             <Text fontSize="lg" mb={6} color="gray.700">
               {topic.topic_name}
             </Text>

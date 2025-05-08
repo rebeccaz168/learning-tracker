@@ -1,3 +1,4 @@
+import { createNote } from '@/utils/api';
 import {
   Button,
   Input,
@@ -14,26 +15,23 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
-
-interface AddNoteModalProps {
-  onAddNote: (note: { title: string; reflection: string; topic_name: string }) => void;
-}
-
-export const AddNoteModal = ({ onAddNote }: AddNoteModalProps) => {
+export const AddNoteModal = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [title, setTitle] = useState('');
   const [reflection, setReflection] = useState('');
   const [topicName, setTopicName] = useState('');
 
-  const handleAdd = () => {
+ 
+  const handleCreateNote = async (title: string, reflection: string, topic_name: string) => {
+    // missing fields 
     if (!title || !reflection || !topicName) return;
-
-    onAddNote({ title, reflection, topic_name: topicName });
-    setTitle('');
-    setReflection('');
-    setTopicName('');
-    onClose();
-  };
+    try{
+      await createNote(title, reflection, topic_name)
+      onClose(); // close the modal after note creation 
+    }catch(err){
+      console.error('Error creating note')
+    }
+  }
 
   return (
     <>
@@ -66,7 +64,7 @@ export const AddNoteModal = ({ onAddNote }: AddNoteModalProps) => {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="green" onClick={handleAdd}>
+            <Button colorScheme="green" onClick={()=> handleCreateNote(title, reflection, topicName)}>
               Add
             </Button>
           </ModalFooter>
