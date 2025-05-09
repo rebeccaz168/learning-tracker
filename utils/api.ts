@@ -44,7 +44,7 @@ export const fetchBookmark = async (topicId?: string) => {
 };9
 
 // post request to fetch summary 
-export const fetchSummary = async ( combinedAnswers: string, transcriptId?: string) => {
-    const response = await api.post(`/transcript/${transcriptId}/summary`, { combinedAnswers });
+export const fetchSummary = async ( combinedAnswers: string, topicId?: string) => {
+    const response = await api.post(`/topic/${topicId}/summary`, { combinedAnswers });
     return response.data; 
 };
