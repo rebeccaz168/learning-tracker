@@ -2,6 +2,8 @@ import { summarizeAnswer } from "@/utils/summarizeHelper";
 import { NextRequest, NextResponse } from 'next/server';
 
 // POST method to handle summarization
+
+// avoid additional payload, so have the query be on the backend, security issues 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
     const transcriptId = params.id; // Get transcriptId from URL params
     const { combinedAnswers } = await req.json();  // Assuming filteredBookmarks are sent in the body
