@@ -11,17 +11,16 @@ const BookmarksPage = () => {
   const [bookmarks, setBookmarks] = useState<BookMarkWithInfo[]>([]);
   const [filteredBookmarks, setFilteredBookmarks] = useState<BookMarkWithInfo[]>([]);
   const [topicId, setTopicId] = useState('all');
-  const [transcripts, setTranscripts] = useState<TopicWithNote[]>([]);
+  const [topics, setTopics] = useState<TopicWithNote[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
-  console.log("inside bookmarks page", bookmarks);
   // get all the transcripts 
   useEffect(() => {
     const getTranscripts = async () => {
       try {
         const data = await fetchNote();
-        setTranscripts(data.transcripts || []);
+        setTopics(data.topics || []);
       } catch (error) {
         console.error('Error fetching transcripts:', error);
       }
@@ -34,9 +33,9 @@ const BookmarksPage = () => {
   // once transcripts are loaded get all of the bookmarks 
   useEffect(() => {
     const loadAllBookmarks = async () => {
-        if (transcripts.length === 0) return;
+        if (topics.length === 0) return;
         const allBookmarks = await Promise.all(
-        transcripts.map(async (t: TopicWithNote) => {
+        topics.map(async (t: TopicWithNote) => {
             const data = await fetchBookmark(t.topic.id);
             return data.bookmarks || [];
             })
@@ -48,7 +47,7 @@ const BookmarksPage = () => {
     };
 
     loadAllBookmarks();
-    }, [transcripts]);
+    }, [topics]);
 
     // Filter bookmarks by selected topicId
     useEffect(() => {
@@ -124,10 +123,10 @@ const BookmarksPage = () => {
             onClick={() => setTopicId('all')}
             >
             All
-            </Button>
+            </Button> 
         </WrapItem>
 
-        {transcripts.map(t => (
+        {topics.map(t => (
             <WrapItem key={t.topic.id}>
             <Button
                 variant={topicId === t.topic.id ? 'solid' : 'outline'}

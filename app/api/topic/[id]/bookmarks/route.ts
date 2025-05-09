@@ -36,9 +36,9 @@ export async function GET(
     SELECT 
       b.id AS bookmark_id,
       b.title AS bookmark_title,
-      b.noteId,
-      b.topicId,
-      b.folderId,
+      b.note_id,
+      b.topic_id,
+      b.folder_id,
       
       f.id AS folder_id,
       f.name AS folder_name,
@@ -53,10 +53,10 @@ export async function GET(
       t.topic_name AS topic_name
 
     FROM bookmark b
-    LEFT JOIN folder f ON b.folderId = f.id
-    LEFT JOIN note n ON b.noteId = n.id
-    LEFT JOIN topic t ON b.topicId = t.id
-    WHERE b.topicId = ${topicId};
+    LEFT JOIN folder f ON b.folder_id = f.id
+    LEFT JOIN note n ON b.note_id = n.id
+    LEFT JOIN topic t ON b.topic_id = t.id
+    WHERE b.topic_id = ${topicId};
   `;
 
   const bookmarksWithInfo: BookMarkWithInfo[] = result.rows.map((row: any) => {
