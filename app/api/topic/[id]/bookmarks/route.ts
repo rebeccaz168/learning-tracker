@@ -8,6 +8,24 @@ import {
   BookMarkWithInfo
 } from '@/utils/types';
 
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const topicId = params.id;
+  const { title, noteId, folderId } = await req.json();
+
+  const result = await sql`
+    INSERT INTO bookmark (title, note_id, topic_id, folder_id)
+    VALUES (${title}, ${noteId}, ${topicId}, ${folderId})
+    RETURNING *;
+  `;
+
+  const newBookmark = result.rows[0];
+
+  return NextResponse.json({ success: true, bookmark: newBookmark }, { status: 201 });
+}
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } }

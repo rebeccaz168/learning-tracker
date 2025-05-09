@@ -15,7 +15,7 @@ const BookmarksPage = () => {
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
-  console.log(bookmarks);
+  console.log("inside bookmarks page", bookmarks);
   // get all the transcripts 
   useEffect(() => {
     const getTranscripts = async () => {

@@ -43,12 +43,12 @@ const seedDb = async ({ reset = false }: { reset?: boolean }) => {
       CREATE TABLE bookmark (
         id SERIAL PRIMARY KEY,
         title TEXT,
-        topicId INTEGER,
-        noteId INTEGER,
-        folderId INTEGER,
-        FOREIGN KEY(topicId) REFERENCES topic(id) ON DELETE CASCADE,
-        FOREIGN KEY(noteId) REFERENCES note(id) ON DELETE CASCADE,
-        FOREIGN KEY(folderId) REFERENCES folder(id) ON DELETE CASCADE
+        topic_id INTEGER,
+        note_id INTEGER,
+        folder_id INTEGER,
+        FOREIGN KEY(topic_id) REFERENCES topic(id) ON DELETE CASCADE,
+        FOREIGN KEY(note_id) REFERENCES note(id) ON DELETE CASCADE,
+        FOREIGN KEY(folder_id) REFERENCES folder(id) ON DELETE CASCADE
       );
     `;
   }
